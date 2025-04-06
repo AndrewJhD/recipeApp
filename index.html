@@ -43,98 +43,248 @@
             display: none;
             margin-top: 10px;
         }
+        .group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+        .option-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .dropdown {
+            margin-left: 20px;
+            display: flex;
+            gap: 10px;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        .checkbox-group {
+            display: flex;
+            gap: 10px;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        .checkbox-group input {
+            pointer-events: none;
+        }
+        .dropdown select {
+            pointer-events: none;
+        }
+        .upload-section {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="tabs">
         <div class="tab active" onclick="showTab('viewRecipes')">My Recipes</div>
         <div class="tab" onclick="showTab('addRecipe')">Upload Recipe</div>
-        <div class="tab" onclick="showTab('search')">Search</div>
     </div>
     
     <div id="viewRecipes" class="content active">
-        <h2>My Recipes</h2>
-        <label for="sort-recipes">Sort by:</label>
-        <select id="sort-recipes" onchange="sortRecipes()">
+        <h2>My Recipes:</h2>
+        <!-- <label for="sort-recipes">Sort by:</label>
+            <select id="sort-recipes" onchange="sortRecipes()">
             <option value="name">Name</option>
             <option value="difficulty">Difficulty</option>
-        </select>
-        <br>
-        <div id="recipe-list"></div>
-    </div>
-
-    <div id="addRecipe" class="content">
-        <h2>Upload Recipe</h2>
-        <form id="recipe-form">
-            <label>Recipe Name:</label> 
-            <input type="text" id="recipe-name" required><br>
-            <label>Difficulty:</label>
-            <select id="recipe-difficulty" required>
-                <option value="Easy">Easy</option>
-                <option value="Medium">Medium</option>
-                <option value="Hard">Hard</option>
-            </select><br>
-            <label>Time Required:</label>
-            <input type="text" id="recipe-time" required><br>
-            <label>Ingredients:</label>
-            <div id="ingredients-list"></div> 
-            <button type="button" onclick="addIngredient()">Add Ingredient</button><br>
-            <label>Directions:</label>
-            <div id="directions-list"></div>
-            <button type="button" onclick="addDirection()">Add Step</button> <br>
-            <label>Upload Image:</label>
-            <input type="file" id="recipe-image" accept="image/*"> <br> <br>
-            <button type="submit">Submit Recipe</button>
-        </form>
-    </div>
-    
-    <div id="search" class="content">
+        </select> -->
         <h2>Search Your Recipes</h2>
         <div class="search-container">
             <input type="text" id="search-bar" placeholder="Search by name...">
             <button onclick="performSearch()">Search</button> <br>
             <button onclick="toggleAdvancedSearch()">Advanced Search</button>
         </div>
+        <div id="recipe-list"></div>
         <div id="advancedSearch" class="advanced-search">
             <h2>Advanced Search</h2>
-            <div class="input-group">
-                <label>Other Filters:</label>
-                <select id="filter-type" onchange="toggleFilterOptions()">
-                    <option value="">Select a filter</option>
-                    <option value="ingredients">Ingredients</option>
-                    <option value="cook-time">Cooking Time</option>
-                    <option value="difficulty">Difficulty</option>
-                    <option value="meal-type">Meal Type</option>
-                </select>
-            </div>
-            <div id="ingredients-options" class="filter-options">
-                <label>Include Ingredients:</label>
-                <select id="include-ingredients"></select>
-                <label>Exclude Ingredients:</label>
-                <select id="exclude-ingredients"></select>
-            </div>
-            <div id="cook-time-options" class="filter-options">
-                <label>Cook Time:</label>
-                <select id="cook-time"></select>
-            </div>
-            <div id="difficulty-options" class="filter-options">
-                <label>Difficulty:</label>
-                <select id="difficulty"></select>
-            </div>
-            <div id="meal-type-options" class="filter-options">
-                <label>Meal Type:</label>
-                <select id="meal-type"></select>
+            <div class="group">
+                <div class="option-group">
+                    <label><input type="checkbox" name="main" value="1" onclick="toggleOptions(1)"> Choose Cuisine</label>
+                    <div id="dropdown-1" class="dropdown">
+                        <select disabled>
+                            <option>Include</option>
+                            <option>Exclude</option>
+                        </select>
+                        <div id="checkbox-1" class="checkbox-group">
+                            <label><input type="checkbox" disabled> Chicken</label>
+                            <label><input type="checkbox" disabled> Beef</label>
+                            <label><input type="checkbox" disabled> Tofu</label>
+                            <label><input type="checkbox" disabled> Mushrooms</label>
+                            <label><input type="checkbox" disabled> Tomatoes</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="option-group">
+                    <label><input type="checkbox" name="main" value="2" onclick="toggleOptions(2)"> Dietary Restrictions</label>
+                    <div id="checkbox-2" class="checkbox-group">
+                        <label><input type="checkbox" disabled> Vegetarian</label>
+                        <label><input type="checkbox" disabled> Vegan</label>
+                        <label><input type="checkbox" disabled> Gluten-Free</label>
+                        <label><input type="checkbox" disabled> Nut-Free</label>
+                    </div>
+                </div>
+                <div class="option-group">
+                    <label><input type="checkbox" name="main" value="3" onclick="toggleOptions(3)"> Meal Type:  </label>
+                    <br>
+                    <select id="checkbox-3" required>
+                        <option value="Breakfast">Breakfast</option>
+                        <option value="Brunch">Brunch</option>
+                        <option value="Lunch">Lunch</option>
+                        <option value="Supper">Supper</option>
+                        <option value="Snack">Snack</option>
+                    </select><br>
+                </div>
             </div>
             <button>Search</button>
+        </div>
+        <br>
+        
+    </div>
+
+    <div id="addRecipe" class="content">
+        <h2>Upload Recipe</h2>
+
+        <button onclick="showUploadSection('uploadRecipe')">Upload recipe manually</button>
+        <button onclick="showUploadSection('option2')">Upload recipe via image</button>
+        <button onclick="showUploadSection('option3')">upload recipe via document</button>
+        
+        <div id="uploadRecipe" class="upload-section">
+            <form id="recipe-form">
+                <label>Recipe Name:</label> 
+                <input type="text" id="recipe-name" required><br>
+                <label>Difficulty:</label>
+                <select id="recipe-difficulty" required>
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                </select><br>
+                <label>Time Required (In Minutes):</label>
+                <input type="number" id="recipe-time" required><br>
+                <label>Ingredients:</label>
+                <div id="ingredients-list"></div> 
+                <button type="button" onclick="addIngredient()">Add Ingredient</button><br>
+                <label>Directions:</label>
+                <div id="directions-list"></div>
+                <button type="button" onclick="addDirection()">Add Step</button> <br>
+                <label>Dietary Restrictions:</label> <br>
+                <button type="button" id="dietNotes" onclick="addDietNotes()">Add Dietary Notes</button> <br>
+                <div id="dietaryContainer"></div>
+                <label>Meal Type:</label>
+                <select class="meal-type" required>
+                    <option value="">--Select Meal Type--</option>
+                    <option value="Breakfast">Breakfast</option>
+                    <option value="Brunch">Brunch</option>
+                    <option value="Lunch">Lunch</option>
+                    <option value="Dinner">Dinner</option>
+                    <option value="Snack">Snack</option>
+                </select> <br>
+                <label>Upload Image:</label>
+                <input type="file" id="recipe-image" accept="image/*"> <br> <br>
+                <button type="submit">Submit Recipe</button>
+            </form>
+            <p id="feedback-message"></p>
+        </div>
+        <div id="option2" class="upload-section">
+            <form id="file-submit-form">
+                <label>Upload Image:</label>
+                    <input type="file" id="recipe-file" accept="image/*"> <br> <br>
+                    <button type="submit">Submit Recipe</button>
+            </form>
+        </div>
+        <div id="option3" class="upload-section">
+            <form id="doc-submit-form">
+                <label>Upload Image:</label>
+                    <input type="file" id="doc-file" accept="document/*"> <br> <br>
+                    <button type="submit">Submit Recipe</button>
+            </form>
         </div>
     </div>
     
     <script>
         const ingredients = ["Spinach", "Garlic", "Cream", "Tomato", "Basil", "Chicken", "Beef", "Carrot", "Potato"];
-        const cookTime = ["30 mins and under", "30 min - 1 hour", "1+ hours"];
         const difficulty = ["Easy", "Medium", "Hard"];
-        const mealType = ["Breakfast", "Lunch", "Dinner", "Snack"];
+        const mealType = ["Breakfast","Brunch", "Lunch", "Supper", "Snack"];
         
+        const dietOptions = ["Vegan", "Gluton-Free", "Keto", "Dairy-Free", "Contains Dairy"];
+
+        const dropdownContainer = document.getElementById("dietaryContainer");
+        const addBtn = document.getElementById("dietNotes");
+        let dietDropdownCount = 0;
+
+        function getSelectedValues() {
+        return Array.from(dropdownContainer.querySelectorAll("select"))
+            .map(select => select.value)
+            .filter(val => val !== "");
+        }
+        //dietary drop down stuff
+        function updateAllDropdowns() {
+            const selectedValues = getSelectedValues();
+
+            dropdownContainer.querySelectorAll("select").forEach(select => {
+                const currentValue = select.value;
+
+                select.innerHTML = `<option value="">-- Select an option --</option>`;
+
+                dietOptions.forEach(option => {
+                if (!selectedValues.includes(option) || option === currentValue) {
+                    const opt = document.createElement("option");
+                    opt.value = option;
+                    opt.textContent = option;
+                    select.appendChild(opt);
+                }
+                });
+
+                if (currentValue) select.value = currentValue;
+            });
+
+            // Disable the add button if max dropdowns created or all options selected
+            addBtn.disabled = dietDropdownCount >= dietOptions.length || selectedValues.length >= dietOptions.length;
+            }
+
+        function addDietNotes() {
+            const selectedValues = getSelectedValues();
+            const availableOptions = dietOptions.filter(opt => !selectedValues.includes(opt));
+
+            if (dietDropdownCount >= dietOptions.length || availableOptions.length === 0) {
+                addBtn.disabled = true;
+                return;
+            }
+
+            const wrapper = document.createElement("div");
+            wrapper.style.marginBottom = "10px";
+
+            const select = document.createElement("select");
+            select.setAttribute("required", "");
+            select.className ="dietOption";
+            select.innerHTML = `<option value="">-- Select an option --</option>`;
+            availableOptions.forEach(option => {
+                const opt = document.createElement("option");
+                opt.value = option;
+                opt.textContent = option;
+                select.appendChild(opt);
+            });
+
+            select.addEventListener("change", updateAllDropdowns);
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "Delete";
+            deleteBtn.style.marginLeft = "10px";
+            deleteBtn.onclick = () => {
+                dropdownContainer.removeChild(wrapper);
+                dietDropdownCount--;
+                updateAllDropdowns();
+            };
+
+            wrapper.appendChild(select);
+            wrapper.appendChild(deleteBtn);
+            dropdownContainer.appendChild(wrapper);
+
+            dietDropdownCount++;
+            updateAllDropdowns();
+            }
+
         function populateDropdown(dropdownId, dataArray) {
             const dropdown = document.getElementById(dropdownId);
             dropdown.innerHTML = '<option value="">Select</option>';
@@ -176,9 +326,22 @@
             const list = document.getElementById("ingredients-list");
             const ingredientDiv = document.createElement("div");
             ingredientDiv.innerHTML = `
-                <input type="text" placeholder="Ingredient Name" class="ingredient-name">
-                <input type="text" placeholder="Measurement (e.g., 1 cup)" class="ingredient-measurement">
-                <input type="text" placeholder="Size (e.g., chopped, diced)" class="ingredient-size">
+                <input type="text" placeholder="Ingredient Name" class="ingredient-name" required>
+                <input type="number" placeholder="Measurement (e.g., 1 cup)" class="ingredient-measurement" required>
+                <select class="ingredient-size" required>
+                    <option value="">-- Select Measurement --</option>
+                    <option value="tsp">Teaspoon (tsp)</option>
+                    <option value="tbsp">Tablespoon (tbsp)</option>
+                    <option value="cup">Cup</option>
+                    <option value="ml">Milliliter (ml)</option>
+                    <option value="l">Liter (l)</option>
+                    <option value="oz">Ounce (oz)</option>
+                    <option value="g">Gram (g)</option>
+                    <option value="kg">Kilogram (kg)</option>
+                    <option value="lb">Pound (lb)</option>
+                    <option value="pinch">Pinch</option>
+                    <option value="dash">Dash</option>
+                </select>
                 <button type="button" onclick="this.parentElement.remove()">Remove</button>
             `;
             list.appendChild(ingredientDiv);
@@ -188,98 +351,170 @@
             const list = document.getElementById("directions-list");
             const stepNumber = list.children.length + 1;
             const directionDiv = document.createElement("div");
+            directionDiv.classList.add("direction-item");
+
             directionDiv.innerHTML = `
-                <span>Step ${stepNumber}:</span>
-                <input type="text" class="direction-step">
-                <button type="button" onclick="this.parentElement.remove()">Remove</button>
+                <span class="step-number">Step ${stepNumber}:</span>
+                <input type="text" class="direction-step" required>
+                <button type="button" onclick="removeDirection(this)">Remove</button>
             `;
+
             list.appendChild(directionDiv);
         }
+
+        function removeDirection(button) {
+            const directionItem = button.parentElement;
+            directionItem.remove();
+            updateStepNumbers();
+        }
+
+        function updateStepNumbers() {
+            const steps = document.querySelectorAll("#directions-list .direction-item");
+            steps.forEach((step, index) => {
+                step.querySelector(".step-number").textContent = `Step ${index + 1}:`;
+            });
+        }
+        
+        function toggleOptions(selected) {
+            const dropdowns = document.querySelectorAll(`#dropdown-${selected} select`);
+            const checkboxes = document.querySelector(`#checkbox-${selected}`);
+
+            if (dropdowns.length > 0) {
+                dropdowns.forEach(dropdown => {
+                    dropdown.disabled = !document.querySelector(`input[value='${selected}']`).checked;
+                    dropdown.style.pointerEvents = dropdown.disabled ? 'none' : 'auto';
+                    dropdown.style.opacity = dropdown.disabled ? '0.5' : '1';
+                });
+            }
+            if (checkboxes) {
+                checkboxes.style.pointerEvents = document.querySelector(`input[value='${selected}']`).checked ? 'auto' : 'none';
+                checkboxes.style.opacity = document.querySelector(`input[value='${selected}']`).checked ? '1' : '0.5';
+                checkboxes.querySelectorAll('input').forEach(cb => cb.disabled = !document.querySelector(`input[value='${selected}']`).checked);
+            }
+        }
+        
         
         let recipes = [];
 
         document.getElementById("recipe-form").addEventListener("submit", function(event) {
             event.preventDefault();
 
-            const recipeName = document.getElementById("recipe-name").value;
-            const recipeDifficulty = document.getElementById("recipe-difficulty").value;
-            const recipeTime = document.getElementById("recipe-time").value;
+            try {
+                const recipeName = document.getElementById("recipe-name").value;
+                const recipeDifficulty = document.getElementById("recipe-difficulty").value;
+                const recipeTime = document.getElementById("recipe-time").value;
+                const mealType = document.querySelector(".meal-type").value;
 
-            const ingredients = [];
-            document.querySelectorAll("#ingredients-list div").forEach(div => {
-                const name = div.querySelector(".ingredient-name").value;
-                const measurement = div.querySelector(".ingredient-measurement").value;
-                const size = div.querySelector(".ingredient-size").value;
-                if (name && measurement) {
-                    ingredients.push({ name, measurement, size });
-                }
-            });
+                // Collect ingredients
+                const ingredients = [];
+                document.querySelectorAll("#ingredients-list div").forEach(div => {
+                    const name = div.querySelector(".ingredient-name").value;
+                    const measurement = div.querySelector(".ingredient-measurement").value;
+                    const size = div.querySelector(".ingredient-size").value;
+                    if (name && measurement) {
+                        ingredients.push({ name, measurement, size });
+                    }
+                });
 
-            const directions = [];
-            document.querySelectorAll(".direction-step").forEach(input => {
-                if (input.value.trim()) {
-                    directions.push(input.value.trim());
-                }
-            });
+                // Collect directions
+                const directions = [];
+                document.querySelectorAll(".direction-step").forEach(input => {
+                    if (input.value.trim()) {
+                        directions.push(input.value.trim());
+                    }
+                });
 
+                // Collect dietary restrictions
+                const dietaryRestrictions = [];
+                document.querySelectorAll("#dietaryContainer select").forEach(select => {
+                    if (select.value) {
+                        dietaryRestrictions.push(select.value);
+                    }
+                });
 
-            const imageFile = document.getElementById("recipe-image").files[0];
+                // Handle image file
+                const imageFile = document.getElementById("recipe-image").files[0];
 
-            const recipeData = {
-                name: recipeName,
-                difficulty: recipeDifficulty,
-                time: recipeTime,
-                ingredients,
-                directions,
-                image: imageFile ? URL.createObjectURL(imageFile) : null,
-                expanded: false
-            };
+                // Build the final recipe object
+                const recipeData = {
+                    name: recipeName,
+                    difficulty: recipeDifficulty,
+                    time: recipeTime,
+                    mealType: mealType,
+                    ingredients,
+                    directions,
+                    dietaryRestrictions,
+                    image: imageFile ? URL.createObjectURL(imageFile) : null,
+                    expanded: false
+                };
 
-            console.log(recipeData);
-            recipes.push(recipeData);
-            displayRecipes();
-            
-            document.getElementById("recipe-form").reset();
-            document.getElementById("ingredients-list").innerHTML = "";
-            document.getElementById("directions-list").innerHTML = "";
+                console.log(recipeData);
+                recipes.push(recipeData);
+
+                document.getElementById("feedback-message").innerHTML = "Recipe successfully saved!";
+                displayRecipes();
+
+                // Reset form and lists
+                document.getElementById("recipe-form").reset();
+                document.getElementById("ingredients-list").innerHTML = "";
+                document.getElementById("directions-list").innerHTML = "";
+                document.getElementById("dietaryContainer").innerHTML = "";
+
+            } catch (error) {
+                console.log(error);
+                document.getElementById("feedback-message").innerHTML = "Oh no! We ran into some issues saving your recipe. Please contact us to let us know!";
+            }
         });
+
 
         function displayRecipes() {
             const recipeContainer = document.getElementById("recipe-list");
             if (!recipeContainer) return;
             recipeContainer.innerHTML = "";
-            
+
             recipes.forEach((recipe, index) => {
                 const recipeDiv = document.createElement("div");
                 recipeDiv.classList.add("recipe");
-                
+
                 let recipeContent = `
                     <h3>${recipe.name}</h3>
-                    <p>Difficulty: ${recipe.difficulty}</p>
-                    <p>Time: ${recipe.time}</p>
+                    <p><strong>Difficulty:</strong> ${recipe.difficulty}</p>
+                    <p><strong>Time:</strong> ${recipe.time} minutes</p>
+                    <p><strong>Meal Type:</strong> ${recipe.mealType}</p>
+                    <p><strong>Dietary Restrictions:</strong> ${recipe.dietaryRestrictions && recipe.dietaryRestrictions.length > 0 ? recipe.dietaryRestrictions.join(", ") : "None"}</p>
                     <button onclick="toggleFullRecipe(${index})">
-                        ${recipe.expanded ? "Hide Full Recipe" : "View Full Recipe"}
+                        ${recipe.expanded ? "Hide Full Details" : "View Full Details"}
                     </button>
                 `;
-                
+
                 if (recipe.expanded) {
-                    let ingredientsHtml = "<ul>" + recipe.ingredients.map(ing => `<li>${ing.name} - ${ing.measurement} (${ing.size})</li>`).join("") + "</ul>";
-                    let directionsHtml = "<ol>" + recipe.directions.map(dir => `<li>${dir}</li>`).join("") + "</ol>";
-                    
+                    // Ingredients
+                    const ingredientsHtml = recipe.ingredients.length
+                        ? "<ul>" + recipe.ingredients.map(ing => `<li>${ing.name} - ${ing.measurement} (${ing.size})</li>`).join("") + "</ul>"
+                        : "<p>No ingredients listed.</p>";
+
+                    // Directions
+                    const directionsHtml = recipe.directions.length
+                        ? "<ol>" + recipe.directions.map(dir => `<li>${dir}</li>`).join("") + "</ol>"
+                        : "<p>No directions listed.</p>";
+
+                    // Dietary restrictions already shown above
+
                     recipeContent += `
                         <p><strong>Ingredients:</strong></p>
                         ${ingredientsHtml}
                         <p><strong>Directions:</strong></p>
                         ${directionsHtml}
                         ${recipe.image ? `<img src="${recipe.image}" alt="Recipe Image" style="max-width:200px;">` : ""}
-                        <button onclick="deleteRecipe(${index})">Delete</button>
+                        <br><button onclick="deleteRecipe(${index})">Delete</button>
                     `;
                 }
-                
+
                 recipeDiv.innerHTML = recipeContent;
                 recipeContainer.appendChild(recipeDiv);
             });
         }
+
 
         function toggleFullRecipe(index) {
             recipes[index].expanded = !recipes[index].expanded;
@@ -302,16 +537,28 @@
             }
             displayRecipes();
         }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function showUploadSection(sectionId) {
+            document.querySelectorAll('.upload-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'block';
+        }
         
         window.onload = function() {
-            populateDropdown("include-ingredients", ingredients);
-            populateDropdown("exclude-ingredients", ingredients);
-            populateDropdown("cook-time", cookTime);
-            populateDropdown("difficulty", difficulty);
-            populateDropdown("meal-type", mealType);
             displayRecipes();
         };
-    </script>
     </script>
 </body>
 </html>
