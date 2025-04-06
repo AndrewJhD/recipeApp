@@ -207,11 +207,91 @@
         const difficulty = ["Easy", "Medium", "Hard"];
         const mealType = ["Breakfast","Brunch", "Lunch", "Supper", "Snack"];
         
-        const dietOptions = ["Vegan", "Gluton-Free", "Keto", "Dairy-Free", "Contains Dairy"];
+        const dietOptions = ["Vegan", "Gluton-Free", "Keto", "Dairy-Free", "Contains Dairy","Gluton"];
 
         const dropdownContainer = document.getElementById("dietaryContainer");
         const addBtn = document.getElementById("dietNotes");
         let dietDropdownCount = 0;
+        let recipes = [
+        {           
+            name: "Spaghetti Carbonara",
+            difficulty: "Medium",
+            time: 30,
+            ingredients: [
+                { name: "Spaghetti", measurement: "200g", size: "1 serving" },
+                { name: "Eggs", measurement: "2", size: "large" },
+                { name: "Parmesan", measurement: "50g", size: "grated" },
+                { name: "Bacon", measurement: "100g", size: "diced" }
+            ],
+            directions: [
+                "Boil the spaghetti in salted water until al dente.",
+                "Cook the bacon in a pan until crispy.",
+                "Whisk the eggs and parmesan in a bowl.",
+                "Combine the cooked spaghetti, bacon, and egg mixture, stirring quickly to avoid scrambling the eggs.",
+                "Serve with extra parmesan on top."
+            ],
+            mealType: "Dinner",
+            dietaryRestrictions: ["Gluten", "Dairy"]
+        },
+        {
+            name: "Avocado Toast",
+            difficulty: "Easy",
+            time: 10,
+            ingredients: [
+                { name: "Avocado", measurement: "1", size: "large" },
+                { name: "Whole Wheat Bread", measurement: "2 slices", size: "2 slices" },
+                { name: "Olive Oil", measurement: "1 tsp", size: "optional" },
+                { name: "Lemon", measurement: "1/2", size: "juiced" }
+            ],
+            directions: [
+                "Toast the slices of bread.",
+                "Mash the avocado in a bowl and mix with lemon juice.",
+                "Spread the mashed avocado on the toasted bread.",
+                "Drizzle with olive oil if desired."
+            ],
+            mealType: "Breakfast",
+            dietaryRestrictions: ["Vegan", "Gluten-Free"]
+        },
+        {
+            name: "Chicken Caesar Salad",
+            difficulty: "Medium",
+            time: 20,
+            ingredients: [
+                { name: "Chicken Breast", measurement: "1", size: "grilled and sliced" },
+                { name: "Romaine Lettuce", measurement: "2 cups", size: "chopped" },
+                { name: "Caesar Dressing", measurement: "3 tbsp", size: "optional" },
+                { name: "Croutons", measurement: "1/4 cup", size: "for garnish" },
+                { name: "Parmesan", measurement: "2 tbsp", size: "shredded" }
+            ],
+            directions: [
+                "Grill the chicken breast and slice it.",
+                "Toss the chopped lettuce with Caesar dressing.",
+                "Top with grilled chicken, croutons, and parmesan."
+            ],
+            mealType: "Lunch",
+            dietaryRestrictions: ["Dairy", "Gluten"]
+        },
+        {
+            name: "Vegetable Stir-Fry",
+            difficulty: "Easy",
+            time: 15,
+            ingredients: [
+                { name: "Carrot", measurement: "1", size: "julienned" },
+                { name: "Bell Pepper", measurement: "1", size: "sliced" },
+                { name: "Soy Sauce", measurement: "2 tbsp", size: "low-sodium" },
+                { name: "Olive Oil", measurement: "1 tbsp", size: "for frying" },
+                { name: "Garlic", measurement: "2 cloves", size: "minced" }
+            ],
+            directions: [
+                "Heat the olive oil in a pan over medium heat.",
+                "Add garlic and sauté for 1-2 minutes.",
+                "Add carrots and bell pepper, stir-fry until tender.",
+                "Add soy sauce and stir to coat. Cook for an additional 2 minutes."
+            ],
+            mealType: "Dinner",
+            dietaryRestrictions: ["Vegan", "Gluten-Free"]
+        }
+        ];
 
         function getSelectedValues() {
         return Array.from(dropdownContainer.querySelectorAll("select"))
@@ -394,7 +474,7 @@
         }
         
         
-        let recipes = [];
+        
 
         document.getElementById("recipe-form").addEventListener("submit", function(event) {
             event.preventDefault();
@@ -555,6 +635,49 @@
             });
             document.getElementById(sectionId).style.display = 'block';
         }
+
+        function displaySearchResults(results) {
+            const recipeList = document.getElementById("recipe-list");
+            recipeList.innerHTML = ""; // Clear previous results
+
+            if (results.length === 0) {
+                recipeList.innerHTML = "<p>No recipes found.</p>";
+                return;
+            }
+
+            results.forEach(recipe => {
+                const recipeDiv = document.createElement("div");
+                recipeDiv.classList.add("recipe-item");
+
+                recipeDiv.innerHTML = `
+                    <h3>${recipe.name}</h3>
+                    <p>Difficulty: ${recipe.difficulty}</p>
+                    <p>Meal Type: ${recipe.mealType}</p>
+                    <button onclick="toggleFullRecipe(this)">View Full Recipe</button>
+                    <div class="full-recipe" style="display: none;">
+                        <p><strong>Ingredients:</strong> ${recipe.ingredients.join(", ")}</p>
+                        <p><strong>Directions:</strong></p>
+                        <ol>${recipe.directions.map(step => `<li>${step}</li>`).join('')}</ol>
+                        <p><strong>Time:</strong> ${recipe.time}</p>
+                    </div>
+                `;
+
+                recipeList.appendChild(recipeDiv);
+            });
+        }
+        function performSearch() {
+            const filters = {
+                name: document.getElementById("search-name").value.trim(),
+                difficulty: document.getElementById("search-difficulty").value.trim(),
+                mealType: document.getElementById("search-mealtype").value.trim(),
+                includeIngredients: document.getElementById("include-ingredients").value.trim().split(',').map(i => i.trim()).filter(Boolean),
+                excludeIngredients: document.getElementById("exclude-ingredients").value.trim().split(',').map(i => i.trim()).filter(Boolean),
+            };
+
+            const results = searchRecipes(filters);
+            displaySearchResults(results);
+        }
+
         
         window.onload = function() {
             displayRecipes();
