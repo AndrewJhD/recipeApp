@@ -122,7 +122,10 @@
                         <label><input type="checkbox" disabled> Vegetarian</label>
                         <label><input type="checkbox" disabled> Vegan</label>
                         <label><input type="checkbox" disabled> Gluten-Free</label>
-                        <label><input type="checkbox" disabled> Nut-Free</label>
+                        <label><input type="checkbox" disabled> Contains Gluton</label>
+                        <label><input type="checkbox" disabled> Keto</label>
+                        <label><input type="checkbox" disabled> Dairy-Free</label>
+                        <label><input type="checkbox" disabled> Contains Dairy</label>
                     </div>
                 </div>
                 <div class="option-group">
@@ -207,7 +210,7 @@
         const difficulty = ["Easy", "Medium", "Hard"];
         const mealType = ["Breakfast","Brunch", "Lunch", "Supper", "Snack"];
         
-        const dietOptions = ["Vegan", "Gluton-Free", "Keto", "Dairy-Free", "Contains Dairy","Gluton"];
+        const dietOptions = ["Vegetarian","Vegan", "Gluton-Free", "Keto", "Dairy-Free", "Contains Dairy","Gluton"];
 
         const dropdownContainer = document.getElementById("dietaryContainer");
         const addBtn = document.getElementById("dietNotes");
@@ -233,7 +236,7 @@
                 "Serve with extra parmesan on top."
             ],
             mealType: "Dinner",
-            dietaryRestrictions: ["Gluten", "Dairy"]
+            dietaryRestrictions: ["Contains Gluten", "Dairy"]
         },
         {
             name: "Avocado Toast",
@@ -271,7 +274,7 @@
                 "Top with grilled chicken, croutons, and parmesan."
             ],
             mealType: "Lunch",
-            dietaryRestrictions: ["Dairy", "Gluten"]
+            dietaryRestrictions: ["Dairy", "Contains Gluten"]
         },
         {
             name: "Vegetable Stir-Fry",
