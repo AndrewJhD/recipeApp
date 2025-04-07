@@ -96,7 +96,7 @@
             <button onclick="performSearch()">Search</button> <br>
             <button onclick="toggleAdvancedSearch()">Advanced Search</button>
         </div>
-        <div id="recipe-list"></div>
+        
         <div id="advancedSearch" class="advanced-search">
             <h2>Advanced Search</h2>
             <div class="group">
@@ -136,10 +136,10 @@
                         <option value="Snack">Snack</option>
                     </select><br>
                 </div>
-            </div>
-            <button>Search</button>
-        </div>
+            </div>      
+        </div> <br>
         <br>
+        <div id="recipe-list"></div>
         
     </div>
 
@@ -212,6 +212,8 @@
         const dropdownContainer = document.getElementById("dietaryContainer");
         const addBtn = document.getElementById("dietNotes");
         let dietDropdownCount = 0;
+
+
         let recipes = [
         {           
             name: "Spaghetti Carbonara",
@@ -298,7 +300,6 @@
             .map(select => select.value)
             .filter(val => val !== "");
         }
-        //dietary drop down stuff
         function updateAllDropdowns() {
             const selectedValues = getSelectedValues();
 
@@ -319,7 +320,6 @@
                 if (currentValue) select.value = currentValue;
             });
 
-            // Disable the add button if max dropdowns created or all options selected
             addBtn.disabled = dietDropdownCount >= dietOptions.length || selectedValues.length >= dietOptions.length;
             }
 
@@ -377,12 +377,16 @@
         }
         
         function toggleFilterOptions() {
-            document.querySelectorAll(".filter-options").forEach(option => {
-                option.style.display = "none";
-            });
-            const selectedFilter = document.getElementById("filter-type").value;
-            if (selectedFilter) {
-                document.getElementById(`${selectedFilter}-options`).style.display = "block";
+            const filterType = document.getElementById("filter-type").value;
+            const allOptions = document.querySelectorAll(".filter-options");
+
+            allOptions.forEach(option => option.style.display = "none");
+
+            if (filterType) {
+                const targetOption = document.getElementById(`${filterType}-options`);
+                if (targetOption) {
+                    targetOption.style.display = "block";
+                }
             }
         }
         
@@ -421,6 +425,7 @@
                     <option value="lb">Pound (lb)</option>
                     <option value="pinch">Pinch</option>
                     <option value="dash">Dash</option>
+                    <option value="N/A">Not Applicable</option>
                 </select>
                 <button type="button" onclick="this.parentElement.remove()">Remove</button>
             `;
@@ -472,9 +477,6 @@
                 checkboxes.querySelectorAll('input').forEach(cb => cb.disabled = !document.querySelector(`input[value='${selected}']`).checked);
             }
         }
-        
-        
-        
 
         document.getElementById("recipe-form").addEventListener("submit", function(event) {
             event.preventDefault();
@@ -485,7 +487,6 @@
                 const recipeTime = document.getElementById("recipe-time").value;
                 const mealType = document.querySelector(".meal-type").value;
 
-                // Collect ingredients
                 const ingredients = [];
                 document.querySelectorAll("#ingredients-list div").forEach(div => {
                     const name = div.querySelector(".ingredient-name").value;
@@ -496,7 +497,6 @@
                     }
                 });
 
-                // Collect directions
                 const directions = [];
                 document.querySelectorAll(".direction-step").forEach(input => {
                     if (input.value.trim()) {
@@ -504,7 +504,6 @@
                     }
                 });
 
-                // Collect dietary restrictions
                 const dietaryRestrictions = [];
                 document.querySelectorAll("#dietaryContainer select").forEach(select => {
                     if (select.value) {
@@ -512,10 +511,8 @@
                     }
                 });
 
-                // Handle image file
                 const imageFile = document.getElementById("recipe-image").files[0];
 
-                // Build the final recipe object
                 const recipeData = {
                     name: recipeName,
                     difficulty: recipeDifficulty,
@@ -534,7 +531,6 @@
                 document.getElementById("feedback-message").innerHTML = "Recipe successfully saved!";
                 displayRecipes();
 
-                // Reset form and lists
                 document.getElementById("recipe-form").reset();
                 document.getElementById("ingredients-list").innerHTML = "";
                 document.getElementById("directions-list").innerHTML = "";
@@ -546,47 +542,48 @@
             }
         });
 
-
-        function displayRecipes() {
+        function renderRecipes(recipeList) {
             const recipeContainer = document.getElementById("recipe-list");
             if (!recipeContainer) return;
             recipeContainer.innerHTML = "";
 
-            recipes.forEach((recipe, index) => {
+            recipeList.forEach((recipe, index) => {
                 const recipeDiv = document.createElement("div");
                 recipeDiv.classList.add("recipe");
 
-                let recipeContent = `
-                    <h3>${recipe.name}</h3>
-                    <p><strong>Difficulty:</strong> ${recipe.difficulty}</p>
-                    <p><strong>Time:</strong> ${recipe.time} minutes</p>
-                    <p><strong>Meal Type:</strong> ${recipe.mealType}</p>
-                    <p><strong>Dietary Restrictions:</strong> ${recipe.dietaryRestrictions && recipe.dietaryRestrictions.length > 0 ? recipe.dietaryRestrictions.join(", ") : "None"}</p>
-                    <button onclick="toggleFullRecipe(${index})">
-                        ${recipe.expanded ? "Hide Full Details" : "View Full Details"}
-                    </button>
-                `;
+                const title = `<h3>${recipe.name}</h3>`;
+                const difficulty = `<p><strong>Difficulty:</strong> ${recipe.difficulty}</p>`;
+                const time = `<p><strong>Time:</strong> ${recipe.time} minutes</p>`;
+                const mealType = `<p><strong>Meal Type:</strong> ${recipe.mealType}</p>`;
+                const dietaryRestrictions = `<p><strong>Dietary Restrictions:</strong> ${recipe.dietaryRestrictions?.length ? recipe.dietaryRestrictions.join(", ") : "None"}</p>`;
+                const toggleButton = `<button onclick="toggleFullRecipe(${index})">
+                    ${recipe.expanded ? "Hide Full Details" : "View Full Details"}
+                </button>`;
+
+                let recipeContent = title + difficulty + time + mealType + dietaryRestrictions + toggleButton;
 
                 if (recipe.expanded) {
-                    // Ingredients
                     const ingredientsHtml = recipe.ingredients.length
-                        ? "<ul>" + recipe.ingredients.map(ing => `<li>${ing.name} - ${ing.measurement} (${ing.size})</li>`).join("") + "</ul>"
+                        ? `<ul>${recipe.ingredients.map(ing => `<li>${ing.name} - ${ing.measurement} (${ing.size})</li>`).join("")}</ul>`
                         : "<p>No ingredients listed.</p>";
 
-                    // Directions
                     const directionsHtml = recipe.directions.length
-                        ? "<ol>" + recipe.directions.map(dir => `<li>${dir}</li>`).join("") + "</ol>"
+                        ? `<ol>${recipe.directions.map(dir => `<li>${dir}</li>`).join("")}</ol>`
                         : "<p>No directions listed.</p>";
 
-                    // Dietary restrictions already shown above
+                    const imageHtml = recipe.image
+                        ? `<img src="${recipe.image}" alt="Recipe Image" style="max-width:200px;">`
+                        : "";
+
+                    const deleteButton = `<br><button onclick="deleteRecipe(${index})">Delete</button>`;
 
                     recipeContent += `
                         <p><strong>Ingredients:</strong></p>
                         ${ingredientsHtml}
                         <p><strong>Directions:</strong></p>
                         ${directionsHtml}
-                        ${recipe.image ? `<img src="${recipe.image}" alt="Recipe Image" style="max-width:200px;">` : ""}
-                        <br><button onclick="deleteRecipe(${index})">Delete</button>
+                        ${imageHtml}
+                        ${deleteButton}
                     `;
                 }
 
@@ -594,6 +591,11 @@
                 recipeContainer.appendChild(recipeDiv);
             });
         }
+
+        function displayRecipes() {
+            renderRecipes(recipes);
+        }
+
 
 
         function toggleFullRecipe(index) {
@@ -627,6 +629,11 @@
             });
             document.getElementById(tabId).classList.add('active');
             event.target.classList.add('active');
+
+            if (tabId === 'addRecipe') {
+                displayRecipes();
+                resetFiltersAndSearch();
+            }
         }
 
         function showUploadSection(sectionId) {
@@ -666,18 +673,93 @@
             });
         }
         function performSearch() {
-            const filters = {
-                name: document.getElementById("search-name").value.trim(),
-                difficulty: document.getElementById("search-difficulty").value.trim(),
-                mealType: document.getElementById("search-mealtype").value.trim(),
-                includeIngredients: document.getElementById("include-ingredients").value.trim().split(',').map(i => i.trim()).filter(Boolean),
-                excludeIngredients: document.getElementById("exclude-ingredients").value.trim().split(',').map(i => i.trim()).filter(Boolean),
+            const searchInput = document.getElementById("search-bar").value.trim().toLowerCase();
+            const recipeContainer = document.getElementById("recipe-list");
+            recipeContainer.innerHTML = "";
+
+            let filteredRecipes = recipes;
+
+            if (searchInput) {
+                filteredRecipes = filteredRecipes.filter(recipe =>
+                    recipe.name.toLowerCase().includes(searchInput) ||
+                    recipe.ingredients.some(ingredient => ingredient.name.toLowerCase().includes(searchInput)) ||
+                    recipe.mealType.toLowerCase().includes(searchInput) ||
+                    recipe.dietaryRestrictions.some(restriction => restriction.toLowerCase().includes(searchInput))
+                );
+            }
+
+            const isCuisineChecked = document.querySelector('input[name="main"][value="1"]').checked;
+            const isDietaryChecked = document.querySelector('input[name="main"][value="2"]').checked;
+            const isMealTypeChecked = document.querySelector('input[name="main"][value="3"]').checked;
+
+            if (isCuisineChecked) {
+                const includeOrExclude = document.querySelector('#dropdown-1 select').value;
+                const selectedIngredients = Array.from(document.querySelectorAll('#checkbox-1 input[type="checkbox"]:checked'))
+                    .map(cb => cb.parentElement.textContent.trim().toLowerCase());
+
+                if (selectedIngredients.length > 0) {
+                    filteredRecipes = filteredRecipes.filter(recipe => {
+                        const ingredientNames = recipe.ingredients.map(ingredient => ingredient.name.toLowerCase());
+                        const matchFound = selectedIngredients.some(ingredient => ingredientNames.includes(ingredient));
+                        return includeOrExclude === 'Include' ? matchFound : !matchFound;
+                    });
+                }
+            }
+
+            if (isDietaryChecked) {
+                const selectedRestrictions = Array.from(document.querySelectorAll('#checkbox-2 input[type="checkbox"]:checked'))
+                    .map(cb => cb.parentElement.textContent.trim().toLowerCase());
+
+                if (selectedRestrictions.length > 0) {
+                    filteredRecipes = filteredRecipes.filter(recipe =>
+                        selectedRestrictions.every(restriction =>
+                            recipe.dietaryRestrictions.map(r => r.toLowerCase()).includes(restriction)
+                        )
+                    );
+                }
+            }
+
+            if (isMealTypeChecked) {
+                const selectedMealType = document.querySelector('#checkbox-3').value.toLowerCase();
+                filteredRecipes = filteredRecipes.filter(recipe => recipe.mealType.toLowerCase() === selectedMealType);
+            }
+
+            renderRecipes(filteredRecipes);
+
+            const clearButton = document.createElement("button");
+            clearButton.textContent = "Clear Search";
+            clearButton.onclick = () => {
+                document.getElementById("search-bar").value = "";
+                displayRecipes();
             };
-
-            const results = searchRecipes(filters);
-            displaySearchResults(results);
+            recipeContainer.prepend(clearButton);
         }
+        function resetFiltersAndSearch() {
+            document.getElementById("search-bar").value = "";
 
+            const recipes = document.querySelectorAll('.recipe');
+            recipes.forEach(recipe => recipe.style.display = "block");
+
+            const advancedSearch = document.getElementById("advancedSearch");
+            if (advancedSearch) {
+                advancedSearch.style.display = "none";
+            }
+
+            document.querySelectorAll('#advancedSearch input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+                const parentDropdown = checkbox.closest('.dropdown');
+                if (parentDropdown) {
+                    parentDropdown.querySelectorAll('input[type="checkbox"], select').forEach(innerElement => {
+                        innerElement.disabled = true;
+                    });
+                }
+            });
+
+            const mealTypeSelect = document.getElementById('checkbox-3');
+            if (mealTypeSelect) {
+                mealTypeSelect.selectedIndex = 0;
+            }
+        }
         
         window.onload = function() {
             displayRecipes();
