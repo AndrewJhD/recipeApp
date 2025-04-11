@@ -52,6 +52,7 @@
             display: flex;
             align-items: center;
             margin-bottom: 10px;
+            opacity: 0.5;
         }
         .dropdown {
             margin-left: 20px;
@@ -98,21 +99,16 @@
         </div>
         
         <div id="advancedSearch" class="advanced-search">
-            <h2>Advanced Search</h2>
+            <h2>Advanced Search Filters</h2>
             <div class="group">
                 <div class="option-group">
-                    <label><input type="checkbox" name="main" value="1" onclick="toggleOptions(1)"> Choose Cuisine</label>
+                    <label><input type="checkbox" name="main" value="1" onclick="toggleOptions(1)"> Ingredients</label>
                     <div id="dropdown-1" class="dropdown">
                         <select disabled>
                             <option>Include</option>
                             <option>Exclude</option>
                         </select>
-                        <div id="checkbox-1" class="checkbox-group">
-                            <label><input type="checkbox" disabled> Chicken</label>
-                            <label><input type="checkbox" disabled> Beef</label>
-                            <label><input type="checkbox" disabled> Tofu</label>
-                            <label><input type="checkbox" disabled> Mushrooms</label>
-                            <label><input type="checkbox" disabled> Tomatoes</label>
+                        <div id="checkbox-1" class="checkbox-group ingredient-checkboxes">
                         </div>
                     </div>
                 </div>
@@ -131,13 +127,16 @@
                 <div class="option-group">
                     <label><input type="checkbox" name="main" value="3" onclick="toggleOptions(3)"> Meal Type:  </label>
                     <br>
-                    <select id="checkbox-3" required>
+                    <div id="dropdown-3" class="dropdown">
+                    <select class="dropdown" disabled>
+                        <option value="Breakfast"> --Select an mealtime option--</option>
                         <option value="Breakfast">Breakfast</option>
                         <option value="Brunch">Brunch</option>
                         <option value="Lunch">Lunch</option>
                         <option value="Supper">Supper</option>
                         <option value="Snack">Snack</option>
                     </select><br>
+                    </div>
                 </div>
             </div>      
         </div> <br>
@@ -206,7 +205,7 @@
     </div>
     
     <script>
-        const ingredients = ["Spinach", "Garlic", "Cream", "Tomato", "Basil", "Chicken", "Beef", "Carrot", "Potato"];
+        //const ingredients = ["Spinach", "Garlic", "Cream", "Tomato", "Basil", "Chicken", "Beef", "Carrot", "Potato"];
         const difficulty = ["Easy", "Medium", "Hard"];
         const mealType = ["Breakfast","Brunch", "Lunch", "Supper", "Snack"];
         
@@ -297,6 +296,55 @@
             dietaryRestrictions: ["Vegan", "Gluten-Free"]
         }
         ];
+
+        function getAllIngredientNames(recipes) {
+            const ingredientNames = [];
+            recipes.forEach(recipe => {
+                recipe.ingredients.forEach(ingredient => {
+                    ingredientNames.push(ingredient.name);
+                });
+            });
+            return ingredientNames;
+        }
+
+        const allIngredients = getAllIngredientNames(recipes);
+        console.log("All Ingredients:", allIngredients);
+
+        function displayIngredientDropdown(recipes) {
+            const container = document.getElementById("checkbox-1");
+
+            container.innerHTML = "";
+
+            const select = document.createElement("select");
+            select.id = "ingredient-select";
+
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.textContent = "-- Select an Ingredient --";
+            select.appendChild(defaultOption);
+
+            const ingredientSet = new Set();
+
+            recipes.forEach(recipe => {
+                recipe.ingredients.forEach(ingredient => {
+                    if (ingredient.name) {
+                        ingredientSet.add(ingredient.name);
+                    }
+                });
+            });
+
+            const ingredientList = Array.from(ingredientSet).sort();
+
+            ingredientList.forEach(ingredient => {
+                const option = document.createElement("option");
+                option.value = ingredient;
+                option.textContent = ingredient;
+                select.appendChild(option);
+            });
+            container.appendChild(select);
+        }
+
+        displayIngredientDropdown(recipes);
 
         function getSelectedValues() {
         return Array.from(dropdownContainer.querySelectorAll("select"))
@@ -401,7 +449,7 @@
                 tab.classList.remove('active');
             });
             document.getElementById(tabId).classList.add('active');
-            event.target.classList.add('active');
+                event.target.classList.add('active');
         }
         
         function toggleAdvancedSearch() {
@@ -464,20 +512,32 @@
         }
         
         function toggleOptions(selected) {
-            const dropdowns = document.querySelectorAll(`#dropdown-${selected} select`);
-            const checkboxes = document.querySelector(`#checkbox-${selected}`);
+            const container = document.getElementById(`dropdown-${selected}`);
+            const dropdowns = container ? container.querySelectorAll("select") : [];
+            const checkboxes = document.getElementById(`checkbox-${selected}`);
+
+            const isChecked = document.querySelector(`input[value='${selected}']`).checked;
 
             if (dropdowns.length > 0) {
                 dropdowns.forEach(dropdown => {
-                    dropdown.disabled = !document.querySelector(`input[value='${selected}']`).checked;
-                    dropdown.style.pointerEvents = dropdown.disabled ? 'none' : 'auto';
-                    dropdown.style.opacity = dropdown.disabled ? '0.5' : '1';
+                    dropdown.disabled = !isChecked;
+                    dropdown.style.setProperty("pointer-events", isChecked ? "auto" : "none", "important");
+                    dropdown.style.setProperty("opacity", isChecked ? "1" : "0.5", "important");
                 });
             }
+
             if (checkboxes) {
-                checkboxes.style.pointerEvents = document.querySelector(`input[value='${selected}']`).checked ? 'auto' : 'none';
-                checkboxes.style.opacity = document.querySelector(`input[value='${selected}']`).checked ? '1' : '0.5';
-                checkboxes.querySelectorAll('input').forEach(cb => cb.disabled = !document.querySelector(`input[value='${selected}']`).checked);
+                checkboxes.style.setProperty("pointer-events", isChecked ? "auto" : "none", "important");
+                checkboxes.style.setProperty("opacity", isChecked ? "1" : "0.5", "important");
+
+                checkboxes.querySelectorAll('input').forEach(cb => {
+                    cb.disabled = !isChecked;
+                });
+                checkboxes.querySelectorAll('select').forEach(cb => {
+                    cb.disabled = !isChecked;
+                    cb.style.setProperty("pointer-events", isChecked ? "auto" : "none", "important");
+                    cb.style.setProperty("opacity", isChecked ? "1" : "0.5", "important");
+                });
             }
         }
 
@@ -766,6 +826,7 @@
         
         window.onload = function() {
             displayRecipes();
+            //displayRecipeCheckboxes(recipes);
         };
     </script>
 </body>
