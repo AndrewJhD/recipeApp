@@ -108,7 +108,7 @@
                             <option>Include</option>
                             <option>Exclude</option>
                         </select>
-                        <div id="checkbox-1" class="checkbox-group ingredient-checkboxes">
+                        <div id="checkbox-1" class="checkbox-group">
                         </div>
                     </div>
                 </div>
@@ -128,8 +128,8 @@
                     <label><input type="checkbox" name="main" value="3" onclick="toggleOptions(3)"> Meal Type:  </label>
                     <br>
                     <div id="dropdown-3" class="dropdown">
-                    <select class="dropdown" disabled>
-                        <option value="Breakfast"> --Select an mealtime option--</option>
+                    <select id="meal-types" class="dropdown" disabled>
+                        <option value="empty" selected> --Select an mealtime option--</option>
                         <option value="Breakfast">Breakfast</option>
                         <option value="Brunch">Brunch</option>
                         <option value="Lunch">Lunch</option>
@@ -308,7 +308,7 @@
         }
 
         const allIngredients = getAllIngredientNames(recipes);
-        console.log("All Ingredients:", allIngredients);
+        //console.log("All Ingredients:", allIngredients);
 
         function displayIngredientDropdown(recipes) {
             const container = document.getElementById("checkbox-1");
@@ -317,9 +317,10 @@
 
             const select = document.createElement("select");
             select.id = "ingredient-select";
+            select.required=true;
 
             const defaultOption = document.createElement("option");
-            defaultOption.value = "";
+            defaultOption.value = "empty";
             defaultOption.textContent = "-- Select an Ingredient --";
             select.appendChild(defaultOption);
 
@@ -736,67 +737,116 @@
             });
         }
         function performSearch() {
-            const searchInput = document.getElementById("search-bar").value.trim().toLowerCase();
-            const recipeContainer = document.getElementById("recipe-list");
-            recipeContainer.innerHTML = "";
+                let ErrorNotFound = true;
+                let IngredError = false;
+                let MealError = false;
+                const searchInput = document.getElementById("search-bar").value.trim().toLowerCase();
+                const recipeContainer = document.getElementById("recipe-list");                
+                
+                recipeContainer.innerHTML = "";
 
-            let filteredRecipes = recipes;
 
-            if (searchInput) {
-                filteredRecipes = filteredRecipes.filter(recipe =>
-                    recipe.name.toLowerCase().includes(searchInput) ||
-                    recipe.ingredients.some(ingredient => ingredient.name.toLowerCase().includes(searchInput)) ||
-                    recipe.mealType.toLowerCase().includes(searchInput) ||
-                    recipe.dietaryRestrictions.some(restriction => restriction.toLowerCase().includes(searchInput))
-                );
-            }
-
-            const isCuisineChecked = document.querySelector('input[name="main"][value="1"]').checked;
-            const isDietaryChecked = document.querySelector('input[name="main"][value="2"]').checked;
-            const isMealTypeChecked = document.querySelector('input[name="main"][value="3"]').checked;
-
-            if (isCuisineChecked) {
-                const includeOrExclude = document.querySelector('#dropdown-1 select').value;
-                const selectedIngredients = Array.from(document.querySelectorAll('#checkbox-1 input[type="checkbox"]:checked'))
-                    .map(cb => cb.parentElement.textContent.trim().toLowerCase());
-
-                if (selectedIngredients.length > 0) {
-                    filteredRecipes = filteredRecipes.filter(recipe => {
-                        const ingredientNames = recipe.ingredients.map(ingredient => ingredient.name.toLowerCase());
-                        const matchFound = selectedIngredients.some(ingredient => ingredientNames.includes(ingredient));
-                        return includeOrExclude === 'Include' ? matchFound : !matchFound;
-                    });
-                }
-            }
-
-            if (isDietaryChecked) {
-                const selectedRestrictions = Array.from(document.querySelectorAll('#checkbox-2 input[type="checkbox"]:checked'))
-                    .map(cb => cb.parentElement.textContent.trim().toLowerCase());
-
-                if (selectedRestrictions.length > 0) {
+                let filteredRecipes = recipes;
+                
+                if (searchInput) {
                     filteredRecipes = filteredRecipes.filter(recipe =>
-                        selectedRestrictions.every(restriction =>
-                            recipe.dietaryRestrictions.map(r => r.toLowerCase()).includes(restriction)
-                        )
+                        recipe.name.toLowerCase().includes(searchInput) ||
+                        recipe.ingredients.some(ingredient => ingredient.name.toLowerCase().includes(searchInput)) ||
+                        recipe.mealType.toLowerCase().includes(searchInput) ||
+                        recipe.dietaryRestrictions.some(restriction => restriction.toLowerCase().includes(searchInput))
                     );
                 }
-            }
 
-            if (isMealTypeChecked) {
-                const selectedMealType = document.querySelector('#checkbox-3').value.toLowerCase();
-                filteredRecipes = filteredRecipes.filter(recipe => recipe.mealType.toLowerCase() === selectedMealType);
-            }
+                const isIngredientChecked = document.querySelector('input[name="main"][value="1"]').checked;
+                const isDietaryChecked = document.querySelector('input[name="main"][value="2"]').checked;
+                const isMealTypeChecked = document.querySelector('input[name="main"][value="3"]').checked;
 
-            renderRecipes(filteredRecipes);
+                if (isIngredientChecked) {
+                    const IngredientValidator = document.getElementById('ingredient-select').value;
+                    if(IngredientValidator == "empty"){
+                        ErrorNotFound = false;
+                        IngredError = true;
+                    }
+                    else{
+                        const includeOrExclude = document.querySelector('#dropdown-1 select').value;
+                        const ingredientChoosen = document.getElementById('ingredient-select').value;
 
-            const clearButton = document.createElement("button");
-            clearButton.textContent = "Clear Search";
-            clearButton.onclick = () => {
-                document.getElementById("search-bar").value = "";
-                displayRecipes();
-            };
-            recipeContainer.prepend(clearButton);
+                        filteredRecipes = filteredRecipes.filter(recipe => {
+                            const ingredientNames = recipe.ingredients.map(ingredient => ingredient.name.toLowerCase());
+
+                            const selectedIngredient = ingredientChoosen.toLowerCase();
+
+                            const matchFound = ingredientNames.includes(selectedIngredient);
+
+                            return includeOrExclude === 'Include' ? matchFound : !matchFound;
+                        });
+                    }
+                }
+
+                if (isDietaryChecked) {
+                    const selectedRestrictions = Array.from(document.querySelectorAll('#checkbox-2 input[type="checkbox"]:checked'))
+                        .map(cb => cb.parentElement.textContent.trim().toLowerCase());
+
+                    if (selectedRestrictions.length > 0) {
+                        filteredRecipes = filteredRecipes.filter(recipe =>
+                            selectedRestrictions.every(restriction =>
+                                recipe.dietaryRestrictions.map(r => r.toLowerCase()).includes(restriction)
+                            )
+                        );
+                    }
+                }
+
+                if (isMealTypeChecked) {
+                    const MealTypeValidator = document.getElementById('meal-types').value;
+                    if(MealTypeValidator == "empty"){
+                        ErrorNotFound = false;
+                        MealError = true;
+                    }
+                    else{
+                        const selectedMealType = document.getElementById('meal-types').value.toLowerCase();
+                        filteredRecipes = filteredRecipes.filter(recipe => recipe.mealType.toLowerCase() === selectedMealType);
+                    }
+                }
+                //console.log(ErrorNotFound)
+                //console.log(IngredError)
+                //console.log(MealError)
+
+                if(ErrorNotFound == true){
+                    if(filteredRecipes.length != 0){
+                        renderRecipes(filteredRecipes);
+                        const clearButton = document.createElement("button");
+                        clearButton.textContent = "Clear Search";
+                        clearButton.onclick = () => {
+                            document.getElementById("search-bar").value = "";
+                            displayRecipes();
+                            resetFiltersAndSearch();
+
+                        };
+                        recipeContainer.prepend(clearButton);
+                    }
+                    else{
+                        const recipeContainer = document.getElementById("recipe-list");
+                        recipeContainer.innerHTML = "Uh Oh looks like you don't have any recipes that fit your search... Time to find a new one to Add!";
+                    }
+                    
+                   
+                }
+                else{
+                    if(IngredError && MealError){
+                        alert("Uh Oh you haven't filled in the meal type and ingredients drop downs!");
+                    }
+                    else if(IngredError){
+                        alert("Uh Oh you haven't filled in the ingredients drop down!");
+                    }
+                    else if(MealError){
+                        alert("Uh Oh you haven't filled in the meal type drop downs!");
+                    }
+                    displayRecipes();
+                }
+            
         }
+    
+        
         function resetFiltersAndSearch() {
             document.getElementById("search-bar").value = "";
 
@@ -817,8 +867,11 @@
                     });
                 }
             });
-
-            const mealTypeSelect = document.getElementById('checkbox-3');
+            const ingredientSelect= document.getElementById('ingredient-select');
+            if (ingredientSelect) {
+                ingredientSelect.selectedIndex = 0;
+            }
+            const mealTypeSelect = document.getElementById('dropdown');
             if (mealTypeSelect) {
                 mealTypeSelect.selectedIndex = 0;
             }
