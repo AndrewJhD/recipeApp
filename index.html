@@ -139,8 +139,8 @@
                     </div>
                 </div>
             </div>      
-        </div> <br>
-        <br>
+        </div>
+        
         <div id="recipe-list"></div>
         
     </div>
@@ -221,6 +221,7 @@
             name: "Spaghetti Carbonara",
             difficulty: "Medium",
             time: 30,
+            image: "pictures/spaghetti-carbonara.jpg",
             ingredients: [
                 { name: "Spaghetti", measurement: "200g", size: "1 serving" },
                 { name: "Eggs", measurement: "2", size: "large" },
@@ -241,6 +242,7 @@
             name: "Avocado Toast",
             difficulty: "Easy",
             time: 10,
+            image: "pictures/avacado-toast.jpg",
             ingredients: [
                 { name: "Avocado", measurement: "1", size: "large" },
                 { name: "Whole Wheat Bread", measurement: "2 slices", size: "2 slices" },
@@ -260,6 +262,7 @@
             name: "Chicken Caesar Salad",
             difficulty: "Medium",
             time: 20,
+            image:"pictures/caeser-salad.jpg",
             ingredients: [
                 { name: "Chicken Breast", measurement: "1", size: "grilled and sliced" },
                 { name: "Romaine Lettuce", measurement: "2 cups", size: "chopped" },
@@ -279,6 +282,7 @@
             name: "Vegetable Stir-Fry",
             difficulty: "Easy",
             time: 15,
+            image: "pictures/vegetable-stirfry.jpg",
             ingredients: [
                 { name: "Carrot", measurement: "1", size: "julienned" },
                 { name: "Bell Pepper", measurement: "1", size: "sliced" },
@@ -308,7 +312,6 @@
         }
 
         const allIngredients = getAllIngredientNames(recipes);
-        //console.log("All Ingredients:", allIngredients);
 
         function displayIngredientDropdown(recipes) {
             const container = document.getElementById("checkbox-1");
@@ -593,7 +596,7 @@
                 recipes.push(recipeData);
 
                 document.getElementById("feedback-message").innerHTML = "Recipe successfully saved!";
-                displayRecipes();
+                sortAllRecipes();
 
                 document.getElementById("recipe-form").reset();
                 document.getElementById("ingredients-list").innerHTML = "";
@@ -607,6 +610,7 @@
         });
 
         function renderRecipes(recipeList) {
+            console.log("recipe render called");
             const recipeContainer = document.getElementById("recipe-list");
             if (!recipeContainer) return;
             recipeContainer.innerHTML = "";
@@ -620,38 +624,35 @@
                 const time = `<p><strong>Time:</strong> ${recipe.time} minutes</p>`;
                 const mealType = `<p><strong>Meal Type:</strong> ${recipe.mealType}</p>`;
                 const dietaryRestrictions = `<p><strong>Dietary Restrictions:</strong> ${recipe.dietaryRestrictions?.length ? recipe.dietaryRestrictions.join(", ") : "None"}</p>`;
-                const toggleButton = `<button onclick="toggleFullRecipe(${index})">
-                    ${recipe.expanded ? "Hide Full Details" : "View Full Details"}
+                const imageHtml = recipe.image
+                    ? `<img src="${recipe.image}" alt="Recipe Image" style="max-width:200px; max-height:200px;">`
+                    : "";
+
+                const toggleButton = `<button onclick="toggleDetails(${index})">
+                    View Full Details
                 </button>`;
 
-                let recipeContent = title + difficulty + time + mealType + dietaryRestrictions + toggleButton;
+                const ingredientsHtml = recipe.ingredients.length
+                    ? `<ul>${recipe.ingredients.map(ing => `<li>${ing.name} - ${ing.measurement} (${ing.size})</li>`).join("")}</ul>`
+                    : "<p>No ingredients listed.</p>";
 
-                if (recipe.expanded) {
-                    const ingredientsHtml = recipe.ingredients.length
-                        ? `<ul>${recipe.ingredients.map(ing => `<li>${ing.name} - ${ing.measurement} (${ing.size})</li>`).join("")}</ul>`
-                        : "<p>No ingredients listed.</p>";
+                const directionsHtml = recipe.directions.length
+                    ? `<ol>${recipe.directions.map(dir => `<li>${dir}</li>`).join("")}</ol>`
+                    : "<p>No directions listed.</p>";
 
-                    const directionsHtml = recipe.directions.length
-                        ? `<ol>${recipe.directions.map(dir => `<li>${dir}</li>`).join("")}</ol>`
-                        : "<p>No directions listed.</p>";
+                const deleteButton = `<br><button onclick="deleteRecipe(${index})">Delete</button>`;
 
-                    const imageHtml = recipe.image
-                        ? `<img src="${recipe.image}" alt="Recipe Image" style="max-width:200px;">`
-                        : "";
-
-                    const deleteButton = `<br><button onclick="deleteRecipe(${index})">Delete</button>`;
-
-                    recipeContent += `
+                const expandedContent = `
+                    <div id="expanded-${index}" style="display: none;">
                         <p><strong>Ingredients:</strong></p>
                         ${ingredientsHtml}
                         <p><strong>Directions:</strong></p>
                         ${directionsHtml}
-                        ${imageHtml}
                         ${deleteButton}
-                    `;
-                }
+                    </div>
+                `;
 
-                recipeDiv.innerHTML = recipeContent;
+                recipeDiv.innerHTML = title + difficulty + time + mealType + dietaryRestrictions + imageHtml + "<br>" + toggleButton + expandedContent;
                 recipeContainer.appendChild(recipeDiv);
             });
         }
@@ -662,10 +663,12 @@
 
 
 
-        function toggleFullRecipe(index) {
-            recipes[index].expanded = !recipes[index].expanded;
-            displayRecipes();
+        function toggleDetails(index) {
+            const section = document.getElementById(`expanded-${index}`);
+            if (!section) return;
+            section.style.display = section.style.display === "none" ? "block" : "none";
         }
+
 
         function deleteRecipe(index) {
             recipes.splice(index, 1);
@@ -674,6 +677,7 @@
 
         
         function sortRecipes() {
+            console.log("recipe sort called");
             const sortBy = document.getElementById("sort-recipes").value;
             if (sortBy === "name") {
                 recipes.sort((a, b) => a.name.localeCompare(b.name));
@@ -681,6 +685,12 @@
                 const difficultyOrder = { "Easy": 1, "Medium": 2, "Hard": 3 };
                 recipes.sort((a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty]);
             }
+            displayRecipes();
+        }
+
+        function sortAllRecipes() {
+            console.log("sort all recipes called")
+            recipes.sort((a, b) => a.name.localeCompare(b.name));
             displayRecipes();
         }
 
@@ -695,6 +705,7 @@
             event.target.classList.add('active');
 
             if (tabId === 'addRecipe') {
+
                 displayRecipes();
                 resetFiltersAndSearch();
             }
@@ -708,8 +719,9 @@
         }
 
         function displaySearchResults(results) {
+            console.log("display search results called")
             const recipeList = document.getElementById("recipe-list");
-            recipeList.innerHTML = ""; // Clear previous results
+            recipeList.innerHTML = "";
 
             if (results.length === 0) {
                 recipeList.innerHTML = "<p>No recipes found.</p>";
@@ -737,6 +749,7 @@
             });
         }
         function performSearch() {
+            console.log("preform search called");
                 let ErrorNotFound = true;
                 let IngredError = false;
                 let MealError = false;
@@ -813,12 +826,13 @@
 
                 if(ErrorNotFound == true){
                     if(filteredRecipes.length != 0){
+                        //console.log("filter recipes found")
                         renderRecipes(filteredRecipes);
                         const clearButton = document.createElement("button");
                         clearButton.textContent = "Clear Search";
                         clearButton.onclick = () => {
                             document.getElementById("search-bar").value = "";
-                            displayRecipes();
+                            sortAllRecipes();
                             resetFiltersAndSearch();
 
                         };
@@ -841,6 +855,7 @@
                     else if(MealError){
                         alert("Uh Oh you haven't filled in the meal type drop downs!");
                     }
+                    console.log("error found");
                     displayRecipes();
                 }
             
@@ -848,6 +863,7 @@
     
         
         function resetFiltersAndSearch() {
+            console.log("reset filter called");
             document.getElementById("search-bar").value = "";
 
             const recipes = document.querySelectorAll('.recipe');
@@ -878,7 +894,7 @@
         }
         
         window.onload = function() {
-            displayRecipes();
+            sortAllRecipes();
             //displayRecipeCheckboxes(recipes);
         };
     </script>
