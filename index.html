@@ -135,12 +135,13 @@
                         <option value="Lunch">Lunch</option>
                         <option value="Supper">Supper</option>
                         <option value="Snack">Snack</option>
-                    </select><br>
+                    </select>
                     </div>
                 </div>
             </div>      
-        </div> <br>
-        <br>
+        </div>
+        <div id="reset-button-space"></div><br>
+        
         <div id="recipe-list"></div>
         
     </div>
@@ -221,6 +222,7 @@
             name: "Spaghetti Carbonara",
             difficulty: "Medium",
             time: 30,
+            image: "pictures/spaghetti-carbonara.jpg",
             ingredients: [
                 { name: "Spaghetti", measurement: "200g", size: "1 serving" },
                 { name: "Eggs", measurement: "2", size: "large" },
@@ -241,6 +243,7 @@
             name: "Avocado Toast",
             difficulty: "Easy",
             time: 10,
+            image: "pictures/avacado-toast.jpg",
             ingredients: [
                 { name: "Avocado", measurement: "1", size: "large" },
                 { name: "Whole Wheat Bread", measurement: "2 slices", size: "2 slices" },
@@ -260,6 +263,7 @@
             name: "Chicken Caesar Salad",
             difficulty: "Medium",
             time: 20,
+            image:"pictures/caeser-salad.jpg",
             ingredients: [
                 { name: "Chicken Breast", measurement: "1", size: "grilled and sliced" },
                 { name: "Romaine Lettuce", measurement: "2 cups", size: "chopped" },
@@ -279,6 +283,7 @@
             name: "Vegetable Stir-Fry",
             difficulty: "Easy",
             time: 15,
+            image: "pictures/vegetable-stirfry.jpg",
             ingredients: [
                 { name: "Carrot", measurement: "1", size: "julienned" },
                 { name: "Bell Pepper", measurement: "1", size: "sliced" },
@@ -308,7 +313,6 @@
         }
 
         const allIngredients = getAllIngredientNames(recipes);
-        //console.log("All Ingredients:", allIngredients);
 
         function displayIngredientDropdown(recipes) {
             const container = document.getElementById("checkbox-1");
@@ -589,11 +593,11 @@
                     expanded: false
                 };
 
-                console.log(recipeData);
+                //console.log(recipeData);
                 recipes.push(recipeData);
 
                 document.getElementById("feedback-message").innerHTML = "Recipe successfully saved!";
-                displayRecipes();
+                sortAllRecipes();
 
                 document.getElementById("recipe-form").reset();
                 document.getElementById("ingredients-list").innerHTML = "";
@@ -607,6 +611,7 @@
         });
 
         function renderRecipes(recipeList) {
+            //console.log("recipe render called");
             const recipeContainer = document.getElementById("recipe-list");
             if (!recipeContainer) return;
             recipeContainer.innerHTML = "";
@@ -620,38 +625,35 @@
                 const time = `<p><strong>Time:</strong> ${recipe.time} minutes</p>`;
                 const mealType = `<p><strong>Meal Type:</strong> ${recipe.mealType}</p>`;
                 const dietaryRestrictions = `<p><strong>Dietary Restrictions:</strong> ${recipe.dietaryRestrictions?.length ? recipe.dietaryRestrictions.join(", ") : "None"}</p>`;
-                const toggleButton = `<button onclick="toggleFullRecipe(${index})">
-                    ${recipe.expanded ? "Hide Full Details" : "View Full Details"}
-                </button>`;
+                const imageHtml = recipe.image
+                    ? `<img src="${recipe.image}" alt="Recipe Image" style="max-width:200px; max-height:200px;">`
+                    : "";
 
-                let recipeContent = title + difficulty + time + mealType + dietaryRestrictions + toggleButton;
+                    const toggleButton = `<button id="toggle-button-${index}" onclick="toggleDetails(${index})">
+                                              View Full Details
+                                          </button>`;
 
-                if (recipe.expanded) {
-                    const ingredientsHtml = recipe.ingredients.length
-                        ? `<ul>${recipe.ingredients.map(ing => `<li>${ing.name} - ${ing.measurement} (${ing.size})</li>`).join("")}</ul>`
-                        : "<p>No ingredients listed.</p>";
+                const ingredientsHtml = recipe.ingredients.length
+                    ? `<ul>${recipe.ingredients.map(ing => `<li>${ing.name} - ${ing.measurement} (${ing.size})</li>`).join("")}</ul>`
+                    : "<p>No ingredients listed.</p>";
 
-                    const directionsHtml = recipe.directions.length
-                        ? `<ol>${recipe.directions.map(dir => `<li>${dir}</li>`).join("")}</ol>`
-                        : "<p>No directions listed.</p>";
+                const directionsHtml = recipe.directions.length
+                    ? `<ol>${recipe.directions.map(dir => `<li>${dir}</li>`).join("")}</ol>`
+                    : "<p>No directions listed.</p>";
 
-                    const imageHtml = recipe.image
-                        ? `<img src="${recipe.image}" alt="Recipe Image" style="max-width:200px;">`
-                        : "";
+                const deleteButton = `<br><button onclick="deleteRecipe(${index})">Delete</button>`;
 
-                    const deleteButton = `<br><button onclick="deleteRecipe(${index})">Delete</button>`;
-
-                    recipeContent += `
+                const expandedContent = `
+                    <div id="expanded-${index}" style="display: none;">
                         <p><strong>Ingredients:</strong></p>
                         ${ingredientsHtml}
                         <p><strong>Directions:</strong></p>
                         ${directionsHtml}
-                        ${imageHtml}
                         ${deleteButton}
-                    `;
-                }
+                    </div>
+                `;
 
-                recipeDiv.innerHTML = recipeContent;
+                recipeDiv.innerHTML = title + difficulty + time + mealType + dietaryRestrictions + imageHtml + "<br>" + toggleButton + expandedContent;
                 recipeContainer.appendChild(recipeDiv);
             });
         }
@@ -662,10 +664,23 @@
 
 
 
-        function toggleFullRecipe(index) {
-            recipes[index].expanded = !recipes[index].expanded;
-            displayRecipes();
+        function toggleDetails(index) {
+            const allSections = document.querySelectorAll("[id^='expanded-']");
+            const allButtons = document.querySelectorAll("[id^='toggle-button-']");
+
+            allSections.forEach((section, i) => {
+                const button = allButtons[i];
+                if (i === index) {
+                    const isHidden = section.style.display === "none";
+                    section.style.display = isHidden ? "block" : "none";
+                    button.textContent = isHidden ? "Hide Full Details" : "View Full Details";
+                } else {
+                    section.style.display = "none";
+                    allButtons[i].textContent = "View Full Details";
+                }
+            });
         }
+
 
         function deleteRecipe(index) {
             recipes.splice(index, 1);
@@ -674,6 +689,7 @@
 
         
         function sortRecipes() {
+            //console.log("recipe sort called");
             const sortBy = document.getElementById("sort-recipes").value;
             if (sortBy === "name") {
                 recipes.sort((a, b) => a.name.localeCompare(b.name));
@@ -681,6 +697,12 @@
                 const difficultyOrder = { "Easy": 1, "Medium": 2, "Hard": 3 };
                 recipes.sort((a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty]);
             }
+            displayRecipes();
+        }
+
+        function sortAllRecipes() {
+            //console.log("sort all recipes called")
+            recipes.sort((a, b) => a.name.localeCompare(b.name));
             displayRecipes();
         }
 
@@ -695,6 +717,7 @@
             event.target.classList.add('active');
 
             if (tabId === 'addRecipe') {
+
                 displayRecipes();
                 resetFiltersAndSearch();
             }
@@ -708,8 +731,9 @@
         }
 
         function displaySearchResults(results) {
+            //console.log("display search results called")
             const recipeList = document.getElementById("recipe-list");
-            recipeList.innerHTML = ""; // Clear previous results
+            recipeList.innerHTML = "";
 
             if (results.length === 0) {
                 recipeList.innerHTML = "<p>No recipes found.</p>";
@@ -737,12 +761,14 @@
             });
         }
         function performSearch() {
+            //console.log("preform search called");
                 let ErrorNotFound = true;
                 let IngredError = false;
                 let MealError = false;
                 const searchInput = document.getElementById("search-bar").value.trim().toLowerCase();
                 const recipeContainer = document.getElementById("recipe-list");                
-                
+                const resetButtonContainer = document.getElementById("reset-button-space");
+                resetButtonContainer.innerHTML = "";
                 recipeContainer.innerHTML = "";
 
 
@@ -813,18 +839,26 @@
 
                 if(ErrorNotFound == true){
                     if(filteredRecipes.length != 0){
+                        //console.log("filter recipes found")
                         renderRecipes(filteredRecipes);
                         const clearButton = document.createElement("button");
                         clearButton.textContent = "Clear Search";
                         clearButton.onclick = () => {
                             document.getElementById("search-bar").value = "";
-                            displayRecipes();
+                            sortAllRecipes();
                             resetFiltersAndSearch();
-
                         };
-                        recipeContainer.prepend(clearButton);
+                        resetButtonContainer.append(clearButton);
                     }
                     else{
+                        const clearButton = document.createElement("button");
+                        clearButton.textContent = "Clear Search";
+                        clearButton.onclick = () => {
+                            document.getElementById("search-bar").value = "";
+                            sortAllRecipes();
+                            resetFiltersAndSearch();
+                        };
+                        resetButtonContainer.append(clearButton);
                         const recipeContainer = document.getElementById("recipe-list");
                         recipeContainer.innerHTML = "Uh Oh looks like you don't have any recipes that fit your search... Time to find a new one to Add!";
                     }
@@ -841,15 +875,24 @@
                     else if(MealError){
                         alert("Uh Oh you haven't filled in the meal type drop downs!");
                     }
+                    console.log("error found");
                     displayRecipes();
                 }
             
         }
-    
+        function collapseAllDetails() {
+            const allSections = document.querySelectorAll("[id^='expanded-']");
+            allSections.forEach(section => {
+                section.style.display = "none";
+            });
+        }
         
         function resetFiltersAndSearch() {
+            //console.log("reset filter called");
+            collapseAllDetails();
             document.getElementById("search-bar").value = "";
-
+            const resetButtonContainer = document.getElementById("reset-button-space");
+            resetButtonContainer.innerHTML="";
             const recipes = document.querySelectorAll('.recipe');
             recipes.forEach(recipe => recipe.style.display = "block");
 
@@ -878,7 +921,7 @@
         }
         
         window.onload = function() {
-            displayRecipes();
+            sortAllRecipes();
             //displayRecipeCheckboxes(recipes);
         };
     </script>
